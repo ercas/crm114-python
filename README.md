@@ -23,8 +23,6 @@ of the gory details.
 Requirements
 ------------
 
-Python 2.7 is strongly recommended.
-
 Naturally, the `crm` binary itself is required, and should be in your path.
 Follow the instructions here for your operating system to install CRM-114.
 
