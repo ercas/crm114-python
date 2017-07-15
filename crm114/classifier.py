@@ -1,5 +1,7 @@
+#!/usr/bin/env python2
+
 import os
-import string
+import subprocess
 
 CRM_BINARY = 'crm'
 
@@ -31,28 +33,46 @@ class Classifier(object):
                                              os.path.join(self.path, category +
                                                           CLASSIFICATION_EXT)))
 
-        pipe = os.popen(command, 'w')
-        pipe.write(text)
-        pipe.close()
+        proc = subprocess.Popen(
+            command,
+            shell = True,
+            stdin = subprocess.PIPE
+        )
+        try:
+            proc.stdin.write(bytes(text, "utf-8"))
+        except TypeError:
+            proc.stdin.write(text)
+        proc.stdin.close()
 
     def classify(self, text):
         """ Instructs the classifier to categorize the text, and return the
         name of the category that best matches the text. """
 
         # need to escape path separator for the regex matching
-        path = string.replace(self.path, os.sep, '\\%s' % os.sep)
+        path = self.path.replace(os.sep, "\\%s" % os.sep)
 
         command = CRM_BINARY + (CLASSIFY_CMD % (CLASSIFICATION_TYPE,
                                                 self.file_list_string(),
                                                 path,
                                                 CLASSIFICATION_EXT))
-        fin, fout = os.popen2(command)
-        #print('- Command:   %s' % command)
-        fin.write(text)
-        fin.close()
 
-        output_list = string.split(fout.readline())
-        fout.close()
+        proc = subprocess.Popen(
+            command,
+            shell = True,
+            stdin = subprocess.PIPE,
+            stdout = subprocess.PIPE
+        )
+        try:
+            proc.stdin.write(bytes(text, "utf-8"))
+            (output_list, err) = proc.communicate()
+            output_list = output_list.decode("utf-8", "strict").split()
+        except TypeError:
+            proc.stdin.write(text)
+            (output_list, err) = proc.communicate()
+            output_list = output_list.split()
+
+        proc.stdin.close()
+        proc.stdout.close()
 
         if output_list is None:
             return ('', 0.0)

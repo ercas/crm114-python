@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = '2.0.2'
+VERSION = '2.0.3'
 VERSION_TAG = 'v%s' % VERSION
 README_URL = ('https://github.com/briancline/crm114-python'
               '/blob/%s/README.md' % VERSION_TAG)
